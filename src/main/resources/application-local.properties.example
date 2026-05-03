@@ -1,0 +1,5 @@
+# Copia este archivo como application-local.properties y rellena tus valores locales.
+# Este archivo NO se sube a git.
+
+spring.datasource.password=tu_password_mysql_aqui
+jwt.secret=pon_aqui_una_clave_larga_y_secreta

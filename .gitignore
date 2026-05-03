@@ -1,0 +1,26 @@
+# Maven
+target/
+*.class
+*.jar
+*.war
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Spring Boot
+*.log
+spring-shell.log
+
+# Variables de entorno y configuración local
+application-local.properties
+application-secret.properties
+
+# Claude Code
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
