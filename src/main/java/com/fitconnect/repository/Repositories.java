@@ -7,14 +7,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-// UserRepository     → UserRepository.java
-// RutinaRepository   → RutinaRepository.java
-// EjercicioRepository → EjercicioRepository.java
-
-@Repository
-interface MetricaCorporalRepository extends JpaRepository<MetricaCorporal, Integer> {
-    List<MetricaCorporal> findByClienteIdOrderByFechaDesc(Integer clienteId);
-}
+// UserRepository           → UserRepository.java
+// RutinaRepository         → RutinaRepository.java
+// EjercicioRepository      → EjercicioRepository.java
+// MetricaCorporalRepository → MetricaCorporalRepository.java
 
 @Repository
 interface SuscripcionRepository extends JpaRepository<Suscripcion, Integer> {
