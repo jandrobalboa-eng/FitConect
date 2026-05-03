@@ -1,0 +1,184 @@
+{
+  "info": {
+    "name": "FitConnect API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. AUTH",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/auth/health"
+          }
+        },
+        {
+          "name": "Login como ENTRENADOR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.token) {",
+                  "  pm.collectionVariables.set('token', json.data.token);",
+                  "  console.log('Token guardado:', json.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"entrenador@fitconnect.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login como CLIENTE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.token) {",
+                  "  pm.collectionVariables.set('token', json.data.token);",
+                  "  console.log('Token guardado:', json.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente1@fitconnect.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Registro nuevo usuario",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nuevo Usuario\",\n  \"email\": \"nuevo@test.com\",\n  \"password\": \"123456\",\n  \"rol\": \"cliente\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/register"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. USUARIOS",
+      "item": [
+        {
+          "name": "Mi perfil (GET /me)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/usuarios/me"
+          }
+        },
+        {
+          "name": "Mis clientes — solo entrenador",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/usuarios/clientes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. EJERCICIOS",
+      "item": [
+        {
+          "name": "Catálogo de ejercicios",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/ejercicios"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. RUTINAS",
+      "item": [
+        {
+          "name": "Crear rutina — solo entrenador",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": 2,\n  \"nombre\": \"Rutina fuerza semana 1\",\n  \"descripcion\": \"Enfocada en tren superior\",\n  \"ejercicios\": []\n}"
+            },
+            "url": "{{base_url}}/api/rutinas"
+          }
+        },
+        {
+          "name": "Mis rutinas — solo cliente",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/rutinas/mis-rutinas"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. MÉTRICAS",
+      "item": [
+        {
+          "name": "Registrar métrica — solo cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fecha\": \"2026-05-03\",\n  \"peso\": 75.5,\n  \"medidaCintura\": 82.0,\n  \"medidaCadera\": 95.0,\n  \"notas\": \"Primer registro\"\n}"
+            },
+            "url": "{{base_url}}/api/metricas"
+          }
+        },
+        {
+          "name": "Mis métricas — solo cliente",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/metricas/mis-metricas"
+          }
+        }
+      ]
+    }
+  ]
+}
