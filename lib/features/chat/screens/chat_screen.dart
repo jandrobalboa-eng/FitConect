@@ -24,8 +24,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   bool _cargando = false;
 
   final _dio = Dio();
-  static const _apiKey =
-      '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';
+  static const _apiKey = 'GROQ_API_KEY';
   static const _systemPrompt = '''
 Eres FitBot, un asistente de fitness personal integrado en FitConnect.
 Ayudas a los usuarios con:
