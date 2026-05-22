@@ -201,42 +201,32 @@ export default function Metricas() {
             {!loading && metricas.length === 0 && (
               <p className="text-on-surface-variant text-sm px-md py-md">Aún no tienes métricas registradas.</p>
             )}
-            <div className="divide-y divide-outline-variant">
-              {metricas.map(m => (
-                <div
-                  key={m.id}
-                  className="px-md py-md flex items-center justify-between hover:bg-surface-container transition-colors"
-                >
-                  <div className="flex items-center gap-md">
-                    <div className="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center text-secondary shrink-0">
-                      <span className="material-symbols-outlined">calendar_today</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-on-surface">{m.fecha}</p>
-                      {m.notas && <p className="text-xs text-on-surface-variant italic">"{m.notas}"</p>}
-                    </div>
-                  </div>
-                  <div className="flex gap-xl text-right">
-                    <div>
-                      <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">Peso</p>
-                      <p className="text-2xl font-bold text-primary">
-                        {m.peso} <span className="text-sm font-normal text-on-surface-variant">kg</span>
-                      </p>
-                    </div>
-                    {(m.medidaCintura || m.medidaCadera) && (
-                      <div className="hidden sm:block">
-                        <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">Medidas</p>
-                        <p className="text-sm text-on-surface">
-                          {m.medidaCintura && `C: ${m.medidaCintura}cm`}
-                          {m.medidaCintura && m.medidaCadera && ' · '}
-                          {m.medidaCadera && `Cad: ${m.medidaCadera}cm`}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+            {metricas.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-outline-variant bg-surface-container-low">
+                      <th className="text-left px-md py-sm text-xs font-bold text-on-surface-variant uppercase tracking-wide">Fecha</th>
+                      <th className="text-right px-md py-sm text-xs font-bold text-on-surface-variant uppercase tracking-wide">Peso (kg)</th>
+                      <th className="text-right px-md py-sm text-xs font-bold text-on-surface-variant uppercase tracking-wide">Cintura (cm)</th>
+                      <th className="text-right px-md py-sm text-xs font-bold text-on-surface-variant uppercase tracking-wide">Cadera (cm)</th>
+                      <th className="text-left px-md py-sm text-xs font-bold text-on-surface-variant uppercase tracking-wide">Notas</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-outline-variant">
+                    {metricas.map(m => (
+                      <tr key={m.id} className="hover:bg-surface-container-low transition-colors">
+                        <td className="px-md py-sm font-semibold text-on-surface">{m.fecha}</td>
+                        <td className="px-md py-sm text-right font-bold text-primary">{m.peso}</td>
+                        <td className="px-md py-sm text-right text-on-surface">{m.medidaCintura ?? '—'}</td>
+                        <td className="px-md py-sm text-right text-on-surface">{m.medidaCadera ?? '—'}</td>
+                        <td className="px-md py-sm text-on-surface-variant italic text-xs max-w-[200px] truncate">{m.notas || '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </section>
       </div>

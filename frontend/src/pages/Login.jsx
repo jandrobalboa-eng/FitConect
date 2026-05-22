@@ -127,7 +127,7 @@ export default function Login() {
       </main>
 
       <footer className="w-full py-8 border-t border-outline-variant bg-surface-container-low">
-        <p className="text-center text-sm text-on-surface-variant opacity-60">© 2024 FitConnect Performance Systems</p>
+        <p className="text-center text-sm text-on-surface-variant opacity-60">© 2026 FitConnect Performance Systems</p>
       </footer>
     </div>
   )
