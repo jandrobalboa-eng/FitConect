@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/client'
+import FitBot from '../components/FitBot'
 
 export default function DashboardCliente() {
   const { user } = useAuth()
@@ -112,6 +113,27 @@ export default function DashboardCliente() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* FitBot */}
+      <section>
+        <div className="flex items-center gap-sm border-b border-outline-variant pb-md mb-lg">
+          <span className="material-symbols-outlined text-secondary">smart_toy</span>
+          <h2 className="text-2xl font-bold text-primary">FitBot</h2>
+        </div>
+
+        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/30" style={{ boxShadow: '0 4px 15px rgba(15,23,42,0.04)' }}>
+          <div className="p-md border-b border-outline-variant flex items-center gap-sm">
+            <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-on-secondary-container">smart_toy</span>
+            </div>
+            <div>
+              <p className="font-bold text-on-surface">FitBot</p>
+              <p className="text-xs text-on-surface-variant">Asistente IA · Llama 3.3 70B via Groq</p>
+            </div>
+          </div>
+          <FitBot />
         </div>
       </section>
     </div>

@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/client'
+import FitBot from '../components/FitBot'
 
 export default function DashboardEntrenador() {
   const { user } = useAuth()
+  const [tab, setTab] = useState('clientes')
   const [clientes, setClientes] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -17,6 +19,13 @@ export default function DashboardEntrenador() {
   }, [])
 
   const firstName = user.nombre?.split(' ')[0] || user.nombre
+
+  const tabClass = (key) =>
+    `flex items-center gap-xs px-md py-sm text-sm font-semibold transition-colors border-b-2 ${
+      tab === key
+        ? 'border-secondary text-secondary'
+        : 'border-transparent text-on-surface-variant hover:text-on-surface'
+    }`
 
   return (
     <div className="flex-grow max-w-[1440px] w-full mx-auto px-10 py-lg space-y-xl">
@@ -58,44 +67,67 @@ export default function DashboardEntrenador() {
         </Link>
       </section>
 
-      {/* Clients list */}
-      <section className="space-y-md">
-        <div className="flex justify-between items-end border-b border-outline-variant pb-md">
-          <h2 className="text-2xl font-bold text-primary">Mis clientes</h2>
-          <span className="text-sm text-on-surface-variant">{clientes.length} activos</span>
+      {/* Tabs */}
+      <section>
+        <div className="flex gap-0 border-b border-outline-variant mb-lg">
+          <button onClick={() => setTab('clientes')} className={tabClass('clientes')}>
+            <span className="material-symbols-outlined text-[18px]">group</span>
+            Mis clientes
+          </button>
+          <button onClick={() => setTab('fitbot')} className={tabClass('fitbot')}>
+            <span className="material-symbols-outlined text-[18px]">smart_toy</span>
+            FitBot
+          </button>
         </div>
 
-        {loading && <p className="text-on-surface-variant text-sm">Cargando...</p>}
-        {error && <p className="text-sm" style={{ color: '#ba1a1a' }}>{error}</p>}
-        {!loading && !error && clientes.length === 0 && (
-          <p className="text-on-surface-variant text-sm">No tienes clientes asignados aún.</p>
+        {tab === 'clientes' && (
+          <div className="space-y-md">
+            <span className="text-sm text-on-surface-variant">{clientes.length} clientes activos</span>
+            {loading && <p className="text-on-surface-variant text-sm">Cargando...</p>}
+            {error && <p className="text-sm" style={{ color: '#ba1a1a' }}>{error}</p>}
+            {!loading && !error && clientes.length === 0 && (
+              <p className="text-on-surface-variant text-sm">No tienes clientes asignados aún.</p>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-gutter">
+              {clientes.map(cliente => {
+                const initials = cliente.nombre
+                  ? cliente.nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                  : '?'
+                return (
+                  <div key={cliente.id}
+                    className="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md flex items-center gap-md hover:shadow-md transition-all"
+                    style={{ boxShadow: '0 4px 15px rgba(15,23,42,0.04)' }}>
+                    <div className="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold text-base shrink-0">
+                      {initials}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-on-surface">{cliente.nombre}</p>
+                      <p className="text-sm text-on-surface-variant truncate">{cliente.email}</p>
+                      {cliente.objetivo && (
+                        <p className="text-xs text-secondary mt-1">Objetivo: {cliente.objetivo}</p>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-gutter">
-          {clientes.map(cliente => {
-            const initials = cliente.nombre
-              ? cliente.nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-              : '?'
-            return (
-              <div
-                key={cliente.id}
-                className="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md flex items-center gap-md hover:shadow-md transition-all"
-                style={{ boxShadow: '0 4px 15px rgba(15,23,42,0.04)' }}
-              >
-                <div className="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold text-base shrink-0">
-                  {initials}
-                </div>
-                <div className="min-w-0">
-                  <p className="font-bold text-on-surface">{cliente.nombre}</p>
-                  <p className="text-sm text-on-surface-variant truncate">{cliente.email}</p>
-                  {cliente.objetivo && (
-                    <p className="text-xs text-secondary mt-1">Objetivo: {cliente.objetivo}</p>
-                  )}
-                </div>
+        {tab === 'fitbot' && (
+          <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/30" style={{ boxShadow: '0 4px 15px rgba(15,23,42,0.04)' }}>
+            <div className="p-md border-b border-outline-variant flex items-center gap-sm">
+              <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-on-secondary-container">smart_toy</span>
               </div>
-            )
-          })}
-        </div>
+              <div>
+                <p className="font-bold text-on-surface">FitBot</p>
+                <p className="text-xs text-on-surface-variant">Asistente IA · Llama 3.3 70B via Groq</p>
+              </div>
+            </div>
+            <FitBot />
+          </div>
+        )}
       </section>
     </div>
   )

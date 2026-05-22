@@ -88,7 +88,7 @@ setTimeout(() => navigate('/'), 1500)    } catch (e) {
           Elige tu plan y{' '}
           <span className="text-green-400">empieza hoy</span>
         </h1>
-        <p className="mt-4 text-gray-400 text-lg max-w-xl mx-auto">
+        <p className="mt-4 text-gray-400 text-lg max-w-2xl mx-auto">
           Sin permanencias. Cancela cuando quieras. 14 días de prueba gratis.
         </p>
       </div>
