@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
+private final EmailService emailService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -39,6 +40,8 @@ public class AuthService {
 
         userRepository.save(user);
         String token = jwtService.generateToken(user);
+emailService.enviarBienvenida(user.getEmail(), user.getNombre(), user.getRol().name());
+
 
         return AuthResponse.builder()
                 .token(token)
