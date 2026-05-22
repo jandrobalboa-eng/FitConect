@@ -33,6 +33,14 @@ export default function App() {
               <PrivateRoute><HomeRedirect /></PrivateRoute>
             } />
 
+            <Route path="/precios" element={
+              <PrivateRoute><Precios /></PrivateRoute>
+            } />
+
+            <Route path='/admin' element={
+                <PrivateRoute><DashboardAdmin /></PrivateRoute>
+            } />
+
             <Route path="/ejercicios" element={
               <PrivateRoute><Ejercicios /></PrivateRoute>
             } />

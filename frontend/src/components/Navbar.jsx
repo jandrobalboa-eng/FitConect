@@ -37,6 +37,7 @@ export default function Navbar() {
               <Link to="/" className={linkClass('/')}>Dashboard</Link>
               <Link to="/ejercicios" className={linkClass('/ejercicios')}>Ejercicios</Link>
               <Link to="/crear-rutina" className={linkClass('/crear-rutina')}>Crear rutina</Link>
+               <Link to="/precios" className={linkClass('/precios')}>Precios</Link>
             </>
           )}
           {user.rol === 'cliente' && (
@@ -45,6 +46,7 @@ export default function Navbar() {
               <Link to="/mis-rutinas" className={linkClass('/mis-rutinas')}>Rutinas</Link>
               <Link to="/metricas" className={linkClass('/metricas')}>Métricas</Link>
               <Link to="/ejercicios" className={linkClass('/ejercicios')}>Ejercicios</Link>
+             
             </>
           )}
         </div>
