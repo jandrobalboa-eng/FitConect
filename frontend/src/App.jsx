@@ -10,6 +10,8 @@ import CrearRutina from './pages/CrearRutina'
 import MisRutinas from './pages/MisRutinas'
 import Metricas from './pages/Metricas'
 import Ejercicios from './pages/Ejercicios'
+import Precios from './pages/Precios'
+import DashboardAdmin from './pages/DashboardAdmin'
 
 function HomeRedirect() {
   const { user } = useAuth()
