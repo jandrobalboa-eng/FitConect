@@ -30,7 +30,7 @@ public class UsuarioService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo los entrenadores pueden acceder a esta ruta");
         }
 
-        return userRepository.findClientesByEntrenadorId(entrenador.getId())
+        return userRepository.findByRol(User.Rol.cliente)
                 .stream()
                 .map(UsuarioResponse::from)
                 .toList();
