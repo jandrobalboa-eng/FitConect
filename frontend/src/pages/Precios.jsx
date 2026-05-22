@@ -70,8 +70,7 @@ export default function Precios() {
     try {
       await api.post(`/api/planes/suscribir/${tipo}`)
       setExito(tipo)
-      setTimeout(() => navigate('/dashboard-entrenador'), 1500)
-    } catch (e) {
+setTimeout(() => navigate('/'), 1500)    } catch (e) {
       alert(e.response?.data?.message || 'Error al suscribirse')
     } finally {
       setCargando(null)
