@@ -15,42 +15,105 @@ export default function DashboardCliente() {
       .finally(() => setLoading(false))
   }, [])
 
+  const firstName = user.nombre?.split(' ')[0] || user.nombre
+
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-800 mb-1">Bienvenido, {user.nombre}</h2>
-      <p className="text-gray-500 mb-6">
-        {user.objetivo ? `Objetivo: ${user.objetivo}` : 'Panel de cliente'}
-      </p>
+    <div className="flex-grow max-w-[1440px] w-full mx-auto px-10 py-lg space-y-xl">
+      {/* Welcome Hero */}
+      <section className="space-y-sm">
+        <h1 className="text-5xl font-extrabold text-primary tracking-tight">Buenos días, {firstName}.</h1>
+        <p className="text-on-surface-variant text-lg max-w-2xl">
+          {user.objetivo ? `Objetivo: ${user.objetivo}` : 'Tu panel de rendimiento está listo.'}
+        </p>
+      </section>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <Link to="/mis-rutinas" className="bg-blue-50 border border-blue-200 rounded-xl p-4 hover:bg-blue-100 text-center">
-          <p className="text-3xl font-bold text-blue-600">{rutinas.length}</p>
-          <p className="text-sm text-gray-600 mt-1">Rutinas asignadas</p>
-        </Link>
-        <Link to="/metricas" className="bg-green-50 border border-green-200 rounded-xl p-4 hover:bg-green-100 text-center">
-          <p className="text-xl font-bold text-green-600">Métricas</p>
-          <p className="text-sm text-gray-600 mt-1">Ver mi progreso</p>
-        </Link>
-        <Link to="/ejercicios" className="bg-purple-50 border border-purple-200 rounded-xl p-4 hover:bg-purple-100 text-center">
-          <p className="text-xl font-bold text-purple-600">Ejercicios</p>
-          <p className="text-sm text-gray-600 mt-1">Ver catálogo</p>
-        </Link>
-      </div>
-
-      <h3 className="text-lg font-semibold text-gray-700 mb-3">Mis rutinas recientes</h3>
-      {loading && <p className="text-gray-400">Cargando...</p>}
-      {!loading && rutinas.length === 0 && (
-        <p className="text-gray-400">Tu entrenador aún no te ha asignado ninguna rutina.</p>
-      )}
-      <div className="space-y-3">
-        {rutinas.slice(0, 3).map(rutina => (
-          <div key={rutina.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <p className="font-semibold text-gray-800">{rutina.nombre}</p>
-            <p className="text-sm text-gray-500">{rutina.descripcion}</p>
-            <p className="text-xs text-gray-400 mt-1">Asignada: {rutina.fechaAsignacion}</p>
+      {/* Shortcut Cards */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+        <Link
+          to="/mis-rutinas"
+          className="group flex flex-col items-start p-md bg-surface-container-lowest rounded-xl border border-outline-variant/30 hover:shadow-lg transition-all duration-300 text-left"
+          style={{ boxShadow: '0 4px 15px rgba(15,23,42,0.05)' }}
+        >
+          <div className="w-14 h-14 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container mb-md group-hover:scale-110 transition-transform">
+            <span className="material-symbols-outlined text-[32px]">calendar_today</span>
           </div>
-        ))}
-      </div>
+          <h3 className="text-2xl font-bold text-primary mb-xs">Rutinas</h3>
+          <p className="text-on-surface-variant text-sm">Accede a tus programas de entrenamiento semanales.</p>
+          <div className="mt-lg self-end material-symbols-outlined text-secondary opacity-0 group-hover:opacity-100 transition-opacity">
+            arrow_forward
+          </div>
+        </Link>
+
+        <Link
+          to="/metricas"
+          className="group flex flex-col items-start p-md bg-primary-container rounded-xl hover:shadow-lg transition-all duration-300 text-left"
+        >
+          <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center text-white mb-md group-hover:scale-110 transition-transform">
+            <span className="material-symbols-outlined text-[32px]">monitoring</span>
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-xs">Métricas</h3>
+          <p className="text-on-primary-container text-sm">Explora tus datos fisiológicos y tu progreso.</p>
+          <div className="mt-lg self-end material-symbols-outlined text-secondary">trending_up</div>
+        </Link>
+
+        <Link
+          to="/ejercicios"
+          className="group flex flex-col items-start p-md bg-surface-container-lowest rounded-xl border border-outline-variant/30 hover:shadow-lg transition-all duration-300 text-left"
+          style={{ boxShadow: '0 4px 15px rgba(15,23,42,0.05)' }}
+        >
+          <div className="w-14 h-14 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary mb-md group-hover:scale-110 transition-transform">
+            <span className="material-symbols-outlined text-[32px]">fitness_center</span>
+          </div>
+          <h3 className="text-2xl font-bold text-primary mb-xs">Ejercicios</h3>
+          <p className="text-on-surface-variant text-sm">Explora el catálogo de movimientos y guías.</p>
+          <div className="mt-lg self-end material-symbols-outlined text-secondary opacity-0 group-hover:opacity-100 transition-opacity">
+            arrow_forward
+          </div>
+        </Link>
+      </section>
+
+      {/* Recently Assigned Routines */}
+      <section className="space-y-md">
+        <div className="flex justify-between items-end border-b border-outline-variant pb-md">
+          <h2 className="text-2xl font-bold text-primary">Rutinas asignadas recientemente</h2>
+          <Link to="/mis-rutinas" className="text-secondary text-sm font-semibold hover:underline">
+            Ver todas
+          </Link>
+        </div>
+
+        {loading && <p className="text-on-surface-variant text-sm">Cargando...</p>}
+        {!loading && rutinas.length === 0 && (
+          <p className="text-on-surface-variant text-sm">Tu entrenador aún no te ha asignado ninguna rutina.</p>
+        )}
+
+        <div className="grid grid-cols-1 gap-base">
+          {rutinas.slice(0, 3).map(rutina => (
+            <div
+              key={rutina.id}
+              className="flex flex-col md:flex-row md:items-center justify-between p-md bg-surface hover:bg-surface-container-low transition-colors rounded-lg cursor-default border-b border-outline-variant/20"
+            >
+              <div className="flex items-center gap-md">
+                <div className="w-12 h-12 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+                  <span className="material-symbols-outlined">fitness_center</span>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-xs">
+                    {rutina.entrenadorNombre}
+                  </p>
+                  <h4 className="text-xl font-bold text-primary">{rutina.nombre}</h4>
+                  {rutina.descripcion && (
+                    <p className="text-sm text-on-surface-variant mt-0.5">{rutina.descripcion}</p>
+                  )}
+                </div>
+              </div>
+              <div className="mt-md md:mt-0 text-right shrink-0">
+                <p className="text-xs text-on-surface-variant">Asignada el</p>
+                <p className="text-base font-bold text-primary">{rutina.fechaAsignacion}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }

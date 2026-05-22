@@ -41,91 +41,204 @@ export default function Metricas() {
   }
 
   const datosGrafica = [...metricas].reverse().map(m => ({ fecha: m.fecha, peso: m.peso }))
+  const tendencia = metricas.length >= 2
+    ? (metricas[0].peso - metricas[1].peso).toFixed(1)
+    : null
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Mis métricas</h2>
+    <div className="flex-grow max-w-[1440px] mx-auto w-full px-margin-desktop py-lg">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter items-start">
 
-      {datosGrafica.length > 1 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-          <h3 className="text-sm font-semibold text-gray-600 mb-3">Evolución del peso (kg)</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={datosGrafica}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="fecha" tick={{ fontSize: 11 }} />
-              <YAxis domain={['auto', 'auto']} tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Line type="monotone" dataKey="peso" stroke="#2563eb" strokeWidth={2} dot={{ r: 3 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Registrar nueva métrica</h3>
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Fecha</label>
-              <input type="date" required value={form.fecha}
-                onChange={e => setForm({ ...form, fecha: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Peso (kg)</label>
-              <input type="number" step="0.1" required value={form.peso}
-                onChange={e => setForm({ ...form, peso: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Cintura (cm)</label>
-              <input type="number" step="0.1" value={form.medidaCintura}
-                onChange={e => setForm({ ...form, medidaCintura: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Cadera (cm)</label>
-              <input type="number" step="0.1" value={form.medidaCadera}
-                onChange={e => setForm({ ...form, medidaCadera: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Notas</label>
-              <textarea value={form.notas}
-                onChange={e => setForm({ ...form, notas: e.target.value })}
-                rows={2}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-            </div>
-            {mensaje && <p className={mensaje.includes('Error') ? 'text-red-500 text-sm' : 'text-green-600 text-sm'}>{mensaje}</p>}
-            <button type="submit" disabled={guardando}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm">
-              {guardando ? 'Guardando...' : 'Guardar métrica'}
-            </button>
-          </form>
-        </div>
-
-        <div>
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Historial</h3>
-          {loading && <p className="text-gray-400 text-sm">Cargando...</p>}
-          <div className="space-y-2">
-            {metricas.map(m => (
-              <div key={m.id} className="bg-white rounded-lg border border-gray-200 p-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-700">{m.fecha}</span>
-                  <span className="text-blue-600 font-bold">{m.peso} kg</span>
-                </div>
-                {(m.medidaCintura || m.medidaCadera) && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    {m.medidaCintura && `Cintura: ${m.medidaCintura}cm`}
-                    {m.medidaCintura && m.medidaCadera && ' · '}
-                    {m.medidaCadera && `Cadera: ${m.medidaCadera}cm`}
-                  </p>
-                )}
-                {m.notas && <p className="text-xs text-gray-400 mt-1 italic">"{m.notas}"</p>}
+        {/* Left: Form + Tip */}
+        <section className="md:col-span-4 space-y-gutter">
+          <div
+            className="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30"
+          >
+            <h2 className="text-2xl font-bold text-primary mb-sm">Registrar métrica</h2>
+            <p className="text-sm text-on-surface-variant mb-md">
+              Registra tus medidas regularmente para un seguimiento preciso.
+            </p>
+            <form onSubmit={handleSubmit} className="space-y-md">
+              <div className="space-y-xs">
+                <label className="block text-sm font-semibold text-on-surface">Fecha</label>
+                <input
+                  type="date"
+                  required
+                  value={form.fecha}
+                  onChange={e => setForm({ ...form, fecha: e.target.value })}
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg px-4 py-3 focus:ring-2 focus:ring-secondary focus:border-secondary outline-none transition-all text-sm"
+                />
               </div>
-            ))}
+              <div className="space-y-xs">
+                <label className="block text-sm font-semibold text-on-surface">Peso (kg)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  required
+                  value={form.peso}
+                  onChange={e => setForm({ ...form, peso: e.target.value })}
+                  placeholder="75.0"
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg px-4 py-3 focus:ring-2 focus:ring-secondary focus:border-secondary outline-none transition-all text-sm"
+                />
+              </div>
+              <div className="space-y-xs">
+                <label className="block text-sm font-semibold text-on-surface">Cintura (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={form.medidaCintura}
+                  onChange={e => setForm({ ...form, medidaCintura: e.target.value })}
+                  placeholder="82.0"
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg px-4 py-3 focus:ring-2 focus:ring-secondary focus:border-secondary outline-none transition-all text-sm"
+                />
+              </div>
+              <div className="space-y-xs">
+                <label className="block text-sm font-semibold text-on-surface">Cadera (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={form.medidaCadera}
+                  onChange={e => setForm({ ...form, medidaCadera: e.target.value })}
+                  placeholder="95.0"
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg px-4 py-3 focus:ring-2 focus:ring-secondary focus:border-secondary outline-none transition-all text-sm"
+                />
+              </div>
+              <div className="space-y-xs">
+                <label className="block text-sm font-semibold text-on-surface">Notas</label>
+                <textarea
+                  value={form.notas}
+                  onChange={e => setForm({ ...form, notas: e.target.value })}
+                  rows={2}
+                  placeholder="¿Cómo te encuentras hoy?"
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg px-4 py-3 focus:ring-2 focus:ring-secondary focus:border-secondary outline-none transition-all text-sm resize-none"
+                />
+              </div>
+              {mensaje && (
+                <p className={`text-sm ${mensaje.includes('Error') ? 'text-red-600' : 'text-green-600'}`}>
+                  {mensaje}
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={guardando}
+                className="w-full bg-primary text-on-primary py-3 rounded-lg text-sm font-semibold tracking-wide active:scale-95 transition-transform hover:opacity-90 shadow-lg disabled:opacity-50"
+              >
+                {guardando ? 'Guardando...' : 'Guardar métrica'}
+              </button>
+            </form>
           </div>
-        </div>
+
+          <div className="bg-primary-container p-md rounded-xl relative overflow-hidden">
+            <div className="relative z-10">
+              <span
+                className="material-symbols-outlined text-secondary-fixed mb-sm block"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                lightbulb
+              </span>
+              <h3 className="text-sm font-bold text-on-primary-container mb-xs">Consejo Pro</h3>
+              <p className="text-sm text-on-primary-container opacity-80">
+                Registra tus métricas a la misma hora cada mañana para obtener datos de tendencia más precisos.
+              </p>
+            </div>
+            <div className="absolute -right-4 -bottom-4 opacity-10 pointer-events-none">
+              <span className="material-symbols-outlined text-[120px] text-on-primary-container">monitoring</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Right: Chart + History */}
+        <section className="md:col-span-8 space-y-gutter">
+          <div className="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30">
+            <div className="flex justify-between items-end mb-md">
+              <div>
+                <h2 className="text-2xl font-bold text-primary">Evolución del peso</h2>
+                <p className="text-sm text-on-surface-variant">Historial completo</p>
+              </div>
+              {tendencia !== null && (
+                <span
+                  className="px-3 py-1 text-xs font-bold rounded-full"
+                  style={{
+                    background: parseFloat(tendencia) <= 0 ? '#d8e2ff' : '#ffdad6',
+                    color: parseFloat(tendencia) <= 0 ? '#001a42' : '#93000a',
+                  }}
+                >
+                  Tendencia: {tendencia > 0 ? '+' : ''}{tendencia} kg
+                </span>
+              )}
+            </div>
+            {datosGrafica.length > 1 ? (
+              <ResponsiveContainer width="100%" height={220}>
+                <LineChart data={datosGrafica}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#c6c6cd" />
+                  <XAxis dataKey="fecha" tick={{ fontSize: 11, fill: '#45464d' }} />
+                  <YAxis domain={['auto', 'auto']} tick={{ fontSize: 11, fill: '#45464d' }} />
+                  <Tooltip
+                    contentStyle={{ borderRadius: '8px', border: '1px solid #c6c6cd', fontSize: '13px' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="peso"
+                    stroke="#0058be"
+                    strokeWidth={2.5}
+                    dot={{ r: 4, fill: '#0058be' }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[220px] flex items-center justify-center text-on-surface-variant text-sm">
+                Registra al menos 2 métricas para ver la gráfica.
+              </div>
+            )}
+          </div>
+
+          <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
+            <div className="px-md py-sm border-b border-outline-variant">
+              <h2 className="text-2xl font-bold text-primary">Historial</h2>
+            </div>
+            {loading && <p className="text-on-surface-variant text-sm px-md py-md">Cargando...</p>}
+            {!loading && metricas.length === 0 && (
+              <p className="text-on-surface-variant text-sm px-md py-md">Aún no tienes métricas registradas.</p>
+            )}
+            <div className="divide-y divide-outline-variant">
+              {metricas.map(m => (
+                <div
+                  key={m.id}
+                  className="px-md py-md flex items-center justify-between hover:bg-surface-container transition-colors"
+                >
+                  <div className="flex items-center gap-md">
+                    <div className="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center text-secondary shrink-0">
+                      <span className="material-symbols-outlined">calendar_today</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-on-surface">{m.fecha}</p>
+                      {m.notas && <p className="text-xs text-on-surface-variant italic">"{m.notas}"</p>}
+                    </div>
+                  </div>
+                  <div className="flex gap-xl text-right">
+                    <div>
+                      <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">Peso</p>
+                      <p className="text-2xl font-bold text-primary">
+                        {m.peso} <span className="text-sm font-normal text-on-surface-variant">kg</span>
+                      </p>
+                    </div>
+                    {(m.medidaCintura || m.medidaCadera) && (
+                      <div className="hidden sm:block">
+                        <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wide">Medidas</p>
+                        <p className="text-sm text-on-surface">
+                          {m.medidaCintura && `C: ${m.medidaCintura}cm`}
+                          {m.medidaCintura && m.medidaCadera && ' · '}
+                          {m.medidaCadera && `Cad: ${m.medidaCadera}cm`}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   )

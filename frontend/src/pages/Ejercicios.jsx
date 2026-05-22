@@ -14,21 +14,41 @@ export default function Ejercicios() {
   }, [])
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Catálogo de ejercicios</h2>
+    <div className="flex-grow max-w-[1440px] w-full mx-auto px-10 py-lg">
+      <div className="space-y-md mb-lg border-b border-outline-variant pb-md">
+        <h1 className="text-4xl font-extrabold text-primary tracking-tight">Catálogo de ejercicios</h1>
+        <p className="text-on-surface-variant">Biblioteca completa de movimientos y guías de forma.</p>
+      </div>
 
-      {loading && <p className="text-gray-400">Cargando...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      {loading && <p className="text-on-surface-variant text-sm">Cargando...</p>}
+      {error && <p className="text-sm" style={{ color: '#ba1a1a' }}>{error}</p>}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
         {ejercicios.map(ej => (
-          <div key={ej.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <div
+            key={ej.id}
+            className="bg-surface-container-lowest rounded-xl border border-outline-variant/30 overflow-hidden hover:shadow-lg transition-all duration-300"
+            style={{ boxShadow: '0 4px 15px rgba(15,23,42,0.04)' }}
+          >
             {ej.gifUrl && (
-              <img src={ej.gifUrl} alt={ej.nombre} className="w-full h-40 object-cover rounded-lg mb-3" />
+              <img src={ej.gifUrl} alt={ej.nombre} className="w-full h-44 object-cover" />
             )}
-            <p className="font-semibold text-gray-800">{ej.nombre}</p>
-            <p className="text-xs text-blue-600 font-medium mt-1">{ej.musculoObjetivo}</p>
-            <p className="text-sm text-gray-500 mt-1">{ej.descripcion}</p>
+            {!ej.gifUrl && (
+              <div className="w-full h-44 bg-surface-container-high flex items-center justify-center">
+                <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-40">
+                  fitness_center
+                </span>
+              </div>
+            )}
+            <div className="p-md">
+              <p className="font-bold text-on-surface">{ej.nombre}</p>
+              <span className="inline-block mt-1 px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed text-xs font-bold rounded-full uppercase tracking-wide">
+                {ej.musculoObjetivo}
+              </span>
+              {ej.descripcion && (
+                <p className="text-sm text-on-surface-variant mt-sm">{ej.descripcion}</p>
+              )}
+            </div>
           </div>
         ))}
       </div>
