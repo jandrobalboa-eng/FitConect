@@ -1,6 +1,27 @@
 import { useEffect, useState } from 'react'
 import api from '../api/client'
 
+function ExerciseImage({ url, nombre }) {
+  const [broken, setBroken] = useState(false)
+  if (!url || broken) {
+    return (
+      <div className="w-full h-44 bg-surface-container-high flex items-center justify-center">
+        <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-40">
+          fitness_center
+        </span>
+      </div>
+    )
+  }
+  return (
+    <img
+      src={url}
+      alt={nombre}
+      className="w-full h-44 object-cover"
+      onError={() => setBroken(true)}
+    />
+  )
+}
+
 export default function Ejercicios() {
   const [ejercicios, setEjercicios] = useState([])
   const [loading, setLoading] = useState(true)
@@ -30,16 +51,7 @@ export default function Ejercicios() {
             className="bg-surface-container-lowest rounded-xl border border-outline-variant/30 overflow-hidden hover:shadow-lg transition-all duration-300"
             style={{ boxShadow: '0 4px 15px rgba(15,23,42,0.04)' }}
           >
-            {ej.gifUrl && (
-              <img src={ej.gifUrl} alt={ej.nombre} className="w-full h-44 object-cover" />
-            )}
-            {!ej.gifUrl && (
-              <div className="w-full h-44 bg-surface-container-high flex items-center justify-center">
-                <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-40">
-                  fitness_center
-                </span>
-              </div>
-            )}
+            <ExerciseImage url={ej.gifUrl} nombre={ej.nombre} />
             <div className="p-md">
               <p className="font-bold text-on-surface">{ej.nombre}</p>
               <span className="inline-block mt-1 px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed text-xs font-bold rounded-full uppercase tracking-wide">
