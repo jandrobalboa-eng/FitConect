@@ -12,6 +12,7 @@ import Metricas from './pages/Metricas'
 import Ejercicios from './pages/Ejercicios'
 import Precios from './pages/Precios'
 import DashboardAdmin from './pages/DashboardAdmin'
+import ClienteDetalle from './pages/ClienteDetalle'
 
 function HomeRedirect() {
   const { user } = useAuth()
@@ -57,6 +58,10 @@ export default function App() {
 
             <Route path="/metricas" element={
               <PrivateRoute role="cliente"><Metricas /></PrivateRoute>
+            } />
+
+            <Route path="/cliente/:id" element={
+              <PrivateRoute role="entrenador"><ClienteDetalle /></PrivateRoute>
             } />
 
             <Route path="*" element={<Navigate to="/" replace />} />
