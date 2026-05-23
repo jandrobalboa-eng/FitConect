@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/client'
 import FitBot from '../components/FitBot'
 
 export default function DashboardEntrenador() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [tab, setTab] = useState('clientes')
   const [clientes, setClientes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -94,20 +95,25 @@ export default function DashboardEntrenador() {
                   ? cliente.nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
                   : '?'
                 return (
-                  <div key={cliente.id}
-                    className="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md flex items-center gap-md hover:shadow-md transition-all"
+                  <button
+                    key={cliente.id}
+                    onClick={() => navigate(`/cliente/${cliente.id}`, { state: { cliente } })}
+                    className="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md flex items-center gap-md hover:shadow-md hover:border-secondary/40 transition-all text-left w-full group"
                     style={{ boxShadow: '0 4px 15px rgba(15,23,42,0.04)' }}>
                     <div className="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold text-base shrink-0">
                       {initials}
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-grow">
                       <p className="font-bold text-on-surface">{cliente.nombre}</p>
                       <p className="text-sm text-on-surface-variant truncate">{cliente.email}</p>
                       {cliente.objetivo && (
                         <p className="text-xs text-secondary mt-1">Objetivo: {cliente.objetivo}</p>
                       )}
                     </div>
-                  </div>
+                    <span className="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      arrow_forward
+                    </span>
+                  </button>
                 )
               })}
             </div>
