@@ -36,4 +36,12 @@ public class MetricaController {
         List<MetricaResponse> metricas = metricaService.getMisMetricas(userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.ok("Métricas obtenidas", metricas));
     }
+
+    @GetMapping("/cliente/{clienteId}")
+    public ResponseEntity<ApiResponse<List<MetricaResponse>>> getMetricasByCliente(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Integer clienteId) {
+        List<MetricaResponse> metricas = metricaService.getMetricasByCliente(userDetails.getUsername(), clienteId);
+        return ResponseEntity.ok(ApiResponse.ok("Métricas del cliente obtenidas", metricas));
+    }
 }

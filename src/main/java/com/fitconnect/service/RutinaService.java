@@ -81,4 +81,18 @@ public class RutinaService {
                 .map(RutinaResponse::from)
                 .toList();
     }
+
+    public List<RutinaResponse> getRutinasByCliente(String emailEntrenador, Integer clienteId) {
+        User entrenador = userRepository.findByEmail(emailEntrenador)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        if (entrenador.getRol() != User.Rol.entrenador) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo los entrenadores pueden acceder a esta ruta");
+        }
+
+        return rutinaRepository.findByClienteId(clienteId)
+                .stream()
+                .map(RutinaResponse::from)
+                .toList();
+    }
 }

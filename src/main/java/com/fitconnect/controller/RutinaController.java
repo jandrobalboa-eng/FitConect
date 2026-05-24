@@ -36,4 +36,12 @@ public class RutinaController {
         List<RutinaResponse> rutinas = rutinaService.getMisRutinas(userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.ok("Rutinas obtenidas", rutinas));
     }
+
+    @GetMapping("/cliente/{clienteId}")
+    public ResponseEntity<ApiResponse<List<RutinaResponse>>> getRutinasByCliente(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Integer clienteId) {
+        List<RutinaResponse> rutinas = rutinaService.getRutinasByCliente(userDetails.getUsername(), clienteId);
+        return ResponseEntity.ok(ApiResponse.ok("Rutinas del cliente obtenidas", rutinas));
+    }
 }

@@ -45,4 +45,18 @@ public class MetricaService {
                 .map(MetricaResponse::from)
                 .toList();
     }
+
+    public List<MetricaResponse> getMetricasByCliente(String emailEntrenador, Integer clienteId) {
+        User entrenador = userRepository.findByEmail(emailEntrenador)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        if (entrenador.getRol() != User.Rol.entrenador) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo los entrenadores pueden acceder a esta ruta");
+        }
+
+        return metricaRepository.findByClienteIdOrderByFechaDesc(clienteId)
+                .stream()
+                .map(MetricaResponse::from)
+                .toList();
+    }
 }
