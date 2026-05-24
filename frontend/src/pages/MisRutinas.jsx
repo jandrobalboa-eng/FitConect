@@ -11,6 +11,21 @@ function saveHistorial(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
 }
 
+function inicializarSeries(ejercicios) {
+  return ejercicios.map(ej => ({
+    rutinaEjercicioId: ej.id,
+    ejercicioNombre: ej.nombre,
+    descanso: ej.descanso || '60s',
+    seriesPlaneadas: ej.series || 3,
+    series: Array.from({ length: ej.series || 3 }, (_, i) => ({
+      numeroSerie: i + 1,
+      pesoKg: '',
+      repsRealizadas: '',
+      rir: ''
+    }))
+  }))
+}
+
 export default function MisRutinas() {
   const [tab, setTab] = useState('rutinas')
   const [rutinas, setRutinas] = useState([])
@@ -20,6 +35,7 @@ export default function MisRutinas() {
   const [historial, setHistorial] = useState(loadHistorial)
   const [sesion, setSesion] = useState(null)
   const [editando, setEditando] = useState(null)
+  const [guardando, setGuardando] = useState(false)
   const [timerSeg, setTimerSeg] = useState(60)
   const [timerRestante, setTimerRestante] = useState(null)
   const [timerActivo, setTimerActivo] = useState(false)
@@ -57,43 +73,41 @@ export default function MisRutinas() {
       rutinaNombre: rutina.nombre,
       fecha: new Date().toISOString().split('T')[0],
       inicio: Date.now(),
-      ejercicios: (rutina.ejercicios || []).map(ej => ({
-        nombre: ej.nombre,
-        seriesPlaneadas: ej.series || 3,
-        descanso: ej.descanso || '60s',
-        seriesHechas: []
-      }))
+      ejercicios: inicializarSeries(rutina.ejercicios || [])
     })
     setTab('sesion')
-  }
-
-  function agregarSerie(ejIdx) {
-    setSesion(s => {
-      const ejs = [...s.ejercicios]
-      ejs[ejIdx] = { ...ejs[ejIdx], seriesHechas: [...ejs[ejIdx].seriesHechas, { peso: '', reps: '', rir: '' }] }
-      return { ...s, ejercicios: ejs }
-    })
   }
 
   function actualizarSerie(ejIdx, si, campo, valor) {
     setSesion(s => {
       const ejs = [...s.ejercicios]
-      const series = [...ejs[ejIdx].seriesHechas]
+      const series = [...ejs[ejIdx].series]
       series[si] = { ...series[si], [campo]: valor }
-      ejs[ejIdx] = { ...ejs[ejIdx], seriesHechas: series }
+      ejs[ejIdx] = { ...ejs[ejIdx], series }
       return { ...s, ejercicios: ejs }
     })
   }
 
-  function quitarSerie(ejIdx, si) {
-    setSesion(s => {
-      const ejs = [...s.ejercicios]
-      ejs[ejIdx] = { ...ejs[ejIdx], seriesHechas: ejs[ejIdx].seriesHechas.filter((_, i) => i !== si) }
-      return { ...s, ejercicios: ejs }
-    })
-  }
-
-  function finalizarEntrenamiento() {
+  async function finalizarEntrenamiento() {
+    setGuardando(true)
+    const body = {
+      rutinaId: sesion.rutinaId,
+      fecha: sesion.fecha,
+      registros: sesion.ejercicios.flatMap(ej =>
+        ej.series.map(s => ({
+          rutinaEjercicioId: ej.rutinaEjercicioId,
+          numeroSerie: s.numeroSerie,
+          pesoKg: parseFloat(s.pesoKg) || null,
+          repsRealizadas: parseInt(s.repsRealizadas) || null,
+          rir: parseInt(s.rir) || null
+        }))
+      )
+    }
+    try {
+      await api.post('/api/sesiones', body)
+    } catch {
+      // la sesión se guarda en local aunque el API falle
+    }
     const entrada = { ...sesion, duracion: Math.round((Date.now() - sesion.inicio) / 60000) }
     const nuevo = [entrada, ...historial]
     setHistorial(nuevo)
@@ -101,6 +115,7 @@ export default function MisRutinas() {
     setSesion(null)
     setTimerRestante(null)
     setTimerActivo(false)
+    setGuardando(false)
     setTab('historial')
   }
 
@@ -239,9 +254,9 @@ export default function MisRutinas() {
                   </div>
                 </div>
                 <div className="border-t border-outline-variant/30 p-md space-y-md">
-                  {entrada.ejercicios.filter(ej => ej.seriesHechas.length > 0).map((ej, i) => (
+                  {entrada.ejercicios.map((ej, i) => (
                     <div key={i}>
-                      <p className="text-sm font-semibold text-on-surface mb-sm">{ej.nombre}</p>
+                      <p className="text-sm font-semibold text-on-surface mb-sm">{ej.ejercicioNombre}</p>
                       <div className="overflow-x-auto">
                         <table className="text-xs w-full">
                           <thead>
@@ -253,11 +268,11 @@ export default function MisRutinas() {
                             </tr>
                           </thead>
                           <tbody>
-                            {ej.seriesHechas.map((s, si) => (
+                            {ej.series.map((s, si) => (
                               <tr key={si} className="text-on-surface">
-                                <td className="pr-md py-0.5">{si + 1}</td>
-                                <td className="pr-md py-0.5">{s.peso || '—'}</td>
-                                <td className="pr-md py-0.5">{s.reps || '—'}</td>
+                                <td className="pr-md py-0.5">{s.numeroSerie}</td>
+                                <td className="pr-md py-0.5">{s.pesoKg || '—'}</td>
+                                <td className="pr-md py-0.5">{s.repsRealizadas || '—'}</td>
                                 <td className="py-0.5">{s.rir || '—'}</td>
                               </tr>
                             ))}
@@ -308,66 +323,53 @@ export default function MisRutinas() {
             {sesion.ejercicios.map((ej, ejIdx) => (
               <div key={ejIdx} className="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md">
                 <div className="flex justify-between items-center mb-md">
-                  <h3 className="font-bold text-on-surface">{ej.nombre}</h3>
+                  <h3 className="font-bold text-on-surface">{ej.ejercicioNombre}</h3>
                   <span className="text-xs text-on-surface-variant">{ej.seriesPlaneadas} series · Descanso {ej.descanso}</span>
                 </div>
-
-                {ej.seriesHechas.length > 0 && (
-                  <div className="overflow-x-auto mb-sm">
-                    <table className="text-sm w-full">
-                      <thead>
-                        <tr className="text-xs text-on-surface-variant uppercase tracking-wide">
-                          <th className="text-left pr-md pb-xs">Serie</th>
-                          <th className="text-left pr-md pb-xs">Peso (kg)</th>
-                          <th className="text-left pr-md pb-xs">Reps</th>
-                          <th className="text-left pr-md pb-xs">RIR</th>
-                          <th></th>
+                <div className="overflow-x-auto">
+                  <table className="text-sm w-full">
+                    <thead>
+                      <tr className="text-xs text-on-surface-variant uppercase tracking-wide">
+                        <th className="text-left pr-md pb-xs">Serie</th>
+                        <th className="text-left pr-md pb-xs">Peso (kg)</th>
+                        <th className="text-left pr-md pb-xs">Reps</th>
+                        <th className="text-left pr-md pb-xs">RIR</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ej.series.map((s, si) => (
+                        <tr key={si}>
+                          <td className="pr-md py-1 text-on-surface-variant font-semibold">{s.numeroSerie}</td>
+                          <td className="pr-md py-1">
+                            <input type="number" step="0.5" value={s.pesoKg} placeholder="kg"
+                              onChange={e => actualizarSerie(ejIdx, si, 'pesoKg', e.target.value)}
+                              className="w-20 border border-outline-variant rounded px-2 py-1 text-sm" />
+                          </td>
+                          <td className="pr-md py-1">
+                            <input type="number" value={s.repsRealizadas} placeholder="reps"
+                              onChange={e => actualizarSerie(ejIdx, si, 'repsRealizadas', e.target.value)}
+                              className="w-20 border border-outline-variant rounded px-2 py-1 text-sm" />
+                          </td>
+                          <td className="pr-md py-1">
+                            <input type="number" min="0" max="5" value={s.rir} placeholder="RIR"
+                              onChange={e => actualizarSerie(ejIdx, si, 'rir', e.target.value)}
+                              className="w-20 border border-outline-variant rounded px-2 py-1 text-sm" />
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {ej.seriesHechas.map((s, si) => (
-                          <tr key={si}>
-                            <td className="pr-md py-1 text-on-surface-variant">{si + 1}</td>
-                            <td className="pr-md py-1">
-                              <input type="number" step="0.5" value={s.peso} placeholder="kg"
-                                onChange={e => actualizarSerie(ejIdx, si, 'peso', e.target.value)}
-                                className="w-20 border border-outline-variant rounded px-2 py-1 text-sm" />
-                            </td>
-                            <td className="pr-md py-1">
-                              <input type="number" value={s.reps} placeholder="reps"
-                                onChange={e => actualizarSerie(ejIdx, si, 'reps', e.target.value)}
-                                className="w-20 border border-outline-variant rounded px-2 py-1 text-sm" />
-                            </td>
-                            <td className="pr-md py-1">
-                              <input type="number" min="0" max="5" value={s.rir} placeholder="RIR"
-                                onChange={e => actualizarSerie(ejIdx, si, 'rir', e.target.value)}
-                                className="w-20 border border-outline-variant rounded px-2 py-1 text-sm" />
-                            </td>
-                            <td className="py-1">
-                              <button onClick={() => quitarSerie(ejIdx, si)} className="text-on-surface-variant hover:text-error">
-                                <span className="material-symbols-outlined text-[18px]">close</span>
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-
-                <button onClick={() => agregarSerie(ejIdx)}
-                  className="text-sm text-secondary font-semibold flex items-center gap-xs hover:underline">
-                  <span className="material-symbols-outlined text-[18px]">add_circle</span>
-                  Añadir serie
-                </button>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ))}
           </div>
 
-          <button onClick={finalizarEntrenamiento}
-            className="mt-lg w-full bg-primary text-on-primary py-4 rounded-xl font-bold text-base tracking-wide hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2">
-            <span className="material-symbols-outlined">check_circle</span>
-            Finalizar entrenamiento
+          <button onClick={finalizarEntrenamiento} disabled={guardando}
+            className="mt-lg w-full bg-primary text-on-primary py-4 rounded-xl font-bold text-base tracking-wide hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-60">
+            {guardando
+              ? <><span className="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>Guardando...</>
+              : <><span className="material-symbols-outlined">check_circle</span>Finalizar entrenamiento</>
+            }
           </button>
         </div>
       )}
@@ -386,9 +388,9 @@ function EditarEntrenamiento({ entrada, onGuardar, onCancelar }) {
   function actualizarSerie(ejIdx, si, campo, valor) {
     setDatos(d => {
       const ejs = [...d.ejercicios]
-      const series = [...ejs[ejIdx].seriesHechas]
+      const series = [...ejs[ejIdx].series]
       series[si] = { ...series[si], [campo]: valor }
-      ejs[ejIdx] = { ...ejs[ejIdx], seriesHechas: series }
+      ejs[ejIdx] = { ...ejs[ejIdx], series }
       return { ...d, ejercicios: ejs }
     })
   }
@@ -415,20 +417,20 @@ function EditarEntrenamiento({ entrada, onGuardar, onCancelar }) {
                 className="w-full border border-outline-variant rounded-lg px-3 py-2 text-sm" />
             </div>
           </div>
-          {datos.ejercicios.filter(ej => ej.seriesHechas.length > 0).map((ej, ejIdx) => (
+          {datos.ejercicios.map((ej, ejIdx) => (
             <div key={ejIdx}>
-              <p className="text-sm font-bold text-on-surface mb-sm">{ej.nombre}</p>
+              <p className="text-sm font-bold text-on-surface mb-sm">{ej.ejercicioNombre}</p>
               <div className="grid grid-cols-4 gap-xs text-xs text-on-surface-variant font-semibold mb-xs px-1">
                 <span>Serie</span><span>Peso (kg)</span><span>Reps</span><span>RIR</span>
               </div>
-              {ej.seriesHechas.map((s, si) => (
+              {ej.series.map((s, si) => (
                 <div key={si} className="grid grid-cols-4 gap-xs mb-xs items-center">
-                  <span className="text-xs text-on-surface-variant text-center py-2">{si + 1}</span>
-                  <input type="number" step="0.5" value={s.peso} placeholder="kg"
-                    onChange={e => actualizarSerie(ejIdx, si, 'peso', e.target.value)}
+                  <span className="text-xs text-on-surface-variant text-center py-2">{s.numeroSerie}</span>
+                  <input type="number" step="0.5" value={s.pesoKg} placeholder="kg"
+                    onChange={e => actualizarSerie(ejIdx, si, 'pesoKg', e.target.value)}
                     className="border border-outline-variant rounded px-2 py-1.5 text-sm" />
-                  <input type="number" value={s.reps} placeholder="reps"
-                    onChange={e => actualizarSerie(ejIdx, si, 'reps', e.target.value)}
+                  <input type="number" value={s.repsRealizadas} placeholder="reps"
+                    onChange={e => actualizarSerie(ejIdx, si, 'repsRealizadas', e.target.value)}
                     className="border border-outline-variant rounded px-2 py-1.5 text-sm" />
                   <input type="number" min="0" max="5" value={s.rir} placeholder="RIR"
                     onChange={e => actualizarSerie(ejIdx, si, 'rir', e.target.value)}
