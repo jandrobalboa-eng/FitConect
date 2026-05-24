@@ -44,4 +44,21 @@ public class RutinaController {
         List<RutinaResponse> rutinas = rutinaService.getRutinasByCliente(userDetails.getUsername(), clienteId);
         return ResponseEntity.ok(ApiResponse.ok("Rutinas del cliente obtenidas", rutinas));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<RutinaResponse>> actualizar(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Integer id,
+            @Valid @RequestBody RutinaRequest request) {
+        RutinaResponse response = rutinaService.actualizar(userDetails.getUsername(), id, request);
+        return ResponseEntity.ok(ApiResponse.ok("Rutina actualizada", response));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> eliminar(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Integer id) {
+        rutinaService.eliminar(userDetails.getUsername(), id);
+        return ResponseEntity.ok(ApiResponse.ok("Rutina eliminada", null));
+    }
 }

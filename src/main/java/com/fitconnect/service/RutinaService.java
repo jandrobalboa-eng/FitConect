@@ -48,26 +48,7 @@ public class RutinaService {
                 .ejercicios(new ArrayList<>())
                 .build();
 
-        if (request.getEjercicios() != null) {
-            for (RutinaRequest.RutinaEjercicioRequest re : request.getEjercicios()) {
-                Ejercicio ejercicio = ejercicioRepository.findById(re.getEjercicioId())
-                        .orElseThrow(() -> new ResponseStatusException(
-                                HttpStatus.NOT_FOUND, "Ejercicio no encontrado: " + re.getEjercicioId()));
-
-                RutinaEjercicio rutinaEjercicio = RutinaEjercicio.builder()
-                        .rutina(rutina)
-                        .ejercicio(ejercicio)
-                        .series(re.getSeries())
-                        .repeticiones(re.getRepeticiones())
-                        .descanso(re.getDescanso())
-                        .diaSemana(re.getDiaSemana() != null
-                                ? RutinaEjercicio.DiaSemana.valueOf(re.getDiaSemana())
-                                : null)
-                        .build();
-
-                rutina.getEjercicios().add(rutinaEjercicio);
-            }
-        }
+        agregarEjercicios(rutina, request.getEjercicios());
 
         return RutinaResponse.from(rutinaRepository.save(rutina));
     }
@@ -94,5 +75,63 @@ public class RutinaService {
                 .stream()
                 .map(RutinaResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public RutinaResponse actualizar(String emailEntrenador, Integer id, RutinaRequest request) {
+        User entrenador = userRepository.findByEmail(emailEntrenador)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        Rutina rutina = rutinaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rutina no encontrada"));
+
+        if (!rutina.getEntrenador().getId().equals(entrenador.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes editar esta rutina");
+        }
+
+        rutina.setNombre(request.getNombre());
+        rutina.setDescripcion(request.getDescripcion());
+        rutina.getEjercicios().clear();
+        agregarEjercicios(rutina, request.getEjercicios());
+
+        return RutinaResponse.from(rutinaRepository.save(rutina));
+    }
+
+    @Transactional
+    public void eliminar(String emailEntrenador, Integer id) {
+        User entrenador = userRepository.findByEmail(emailEntrenador)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        Rutina rutina = rutinaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rutina no encontrada"));
+
+        if (!rutina.getEntrenador().getId().equals(entrenador.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes eliminar esta rutina");
+        }
+
+        rutinaRepository.delete(rutina);
+    }
+
+    private void agregarEjercicios(Rutina rutina, List<RutinaRequest.RutinaEjercicioRequest> ejerciciosReq) {
+        if (ejerciciosReq == null) return;
+
+        for (RutinaRequest.RutinaEjercicioRequest re : ejerciciosReq) {
+            Ejercicio ejercicio = ejercicioRepository.findById(re.getEjercicioId())
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND, "Ejercicio no encontrado: " + re.getEjercicioId()));
+
+            RutinaEjercicio rutinaEjercicio = RutinaEjercicio.builder()
+                    .rutina(rutina)
+                    .ejercicio(ejercicio)
+                    .series(re.getSeries())
+                    .repeticiones(re.getRepeticiones())
+                    .descanso(re.getDescanso())
+                    .diaSemana(re.getDiaSemana() != null
+                            ? RutinaEjercicio.DiaSemana.valueOf(re.getDiaSemana())
+                            : null)
+                    .build();
+
+            rutina.getEjercicios().add(rutinaEjercicio);
+        }
     }
 }

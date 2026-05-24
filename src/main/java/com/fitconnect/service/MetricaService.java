@@ -9,6 +9,7 @@ import com.fitconnect.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -58,5 +59,41 @@ public class MetricaService {
                 .stream()
                 .map(MetricaResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public MetricaResponse actualizar(String email, Integer id, MetricaRequest request) {
+        User cliente = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        MetricaCorporal metrica = metricaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Metrica no encontrada"));
+
+        if (!metrica.getCliente().getId().equals(cliente.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes editar esta metrica");
+        }
+
+        metrica.setFecha(request.getFecha());
+        metrica.setPeso(request.getPeso());
+        metrica.setMedidaCintura(request.getMedidaCintura());
+        metrica.setMedidaCadera(request.getMedidaCadera());
+        metrica.setNotas(request.getNotas());
+
+        return MetricaResponse.from(metricaRepository.save(metrica));
+    }
+
+    @Transactional
+    public void eliminar(String email, Integer id) {
+        User cliente = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        MetricaCorporal metrica = metricaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Metrica no encontrada"));
+
+        if (!metrica.getCliente().getId().equals(cliente.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes eliminar esta metrica");
+        }
+
+        metricaRepository.delete(metrica);
     }
 }

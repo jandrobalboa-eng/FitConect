@@ -35,6 +35,6 @@ public class Suscripcion {
     @Column(name = "tipo_pago", nullable = false)
     private TipoPago tipoPago;
 
-    public enum Estado { Activa, Cancelada, Expirada }
+    public enum Estado { Pendiente, Activa, Cancelada, Expirada }
     public enum TipoPago { Mensual, Anual }
 }

@@ -7,18 +7,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-// UserRepository           → UserRepository.java
-// RutinaRepository         → RutinaRepository.java
-// EjercicioRepository      → EjercicioRepository.java
+// UserRepository            → UserRepository.java
+// RutinaRepository          → RutinaRepository.java
+// EjercicioRepository       → EjercicioRepository.java
 // MetricaCorporalRepository → MetricaCorporalRepository.java
-
-@Repository
-interface SuscripcionRepository extends JpaRepository<Suscripcion, Integer> {
-    Optional<Suscripcion> findByClienteIdAndEntrenadorIdAndEstado(
-        Integer clienteId, Integer entrenadorId, Suscripcion.Estado estado);
-    List<Suscripcion> findByClienteId(Integer clienteId);
-    List<Suscripcion> findByEntrenadorId(Integer entrenadorId);
-}
+// SuscripcionRepository     → SuscripcionRepository.java
 
 @Repository
 interface PlanAlimentacionRepository extends JpaRepository<PlanAlimentacion, Integer> {
