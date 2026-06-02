@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/rutina_entrenador_model.dart';
 import '../providers/rutinas_entrenador_provider.dart';
+import '../providers/clientes_entrenador_provider.dart';
 
 class CrearRutinaScreen extends ConsumerStatefulWidget {
   const CrearRutinaScreen({super.key});
@@ -18,13 +19,9 @@ class _CrearRutinaScreenState extends ConsumerState<CrearRutinaScreen> {
   String _anioSeleccionado = '2026';
   final List<TextEditingController> _nombreDiasControllers = [];
 
-  String _clienteSeleccionado = 'María López';
-  String _clienteEmailSeleccionado = 'cliente1@fitconnect.com';
-
-  final List<Map<String, String>> _clientes = [
-    {'nombre': 'María López', 'email': 'cliente1@fitconnect.com'},
-    {'nombre': 'Carlos García', 'email': 'cliente2@fitconnect.com'},
-  ];
+  String _clienteSeleccionado = '';
+  String _clienteEmailSeleccionado = '';
+  List<Map<String, String>> _clientes = [];
 
   final List<String> _meses = [
     'Enero',
@@ -47,6 +44,18 @@ class _CrearRutinaScreenState extends ConsumerState<CrearRutinaScreen> {
   void initState() {
     super.initState();
     _actualizarDias();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final clientes = ref.read(clientesEntrenadorProvider);
+      setState(() {
+        _clientes = clientes
+            .map((c) => {'nombre': c.nombre, 'email': c.email})
+            .toList();
+        if (_clientes.isNotEmpty) {
+          _clienteSeleccionado = _clientes[0]['nombre']!;
+          _clienteEmailSeleccionado = _clientes[0]['email']!;
+        }
+      });
+    });
   }
 
   void _actualizarDias() {
@@ -76,10 +85,19 @@ class _CrearRutinaScreenState extends ConsumerState<CrearRutinaScreen> {
       return;
     }
 
+    if (_clientes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Primero añade un cliente en la pestaña Clientes'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
     final nombreDias = _nombreDiasControllers
         .map((c) => c.text.trim())
         .toList();
-
     final fechaInicio =
         '$_diaSeleccionado/$_mesSeleccionado/$_anioSeleccionado';
 
@@ -128,52 +146,61 @@ class _CrearRutinaScreenState extends ConsumerState<CrearRutinaScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Cliente
             _seccion('Cliente'),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: DropdownButton<String>(
-                value: _clienteSeleccionado,
-                isExpanded: true,
-                dropdownColor: const Color(0xFF1E1E1E),
-                underline: const SizedBox(),
-                style: const TextStyle(color: Colors.white),
-                items: _clientes
-                    .map(
-                      (c) => DropdownMenuItem(
-                        value: c['nombre'],
-                        child: Text(c['nombre']!),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() {
-                      _clienteSeleccionado = val;
-                      _clienteEmailSeleccionado = _clientes.firstWhere(
-                        (c) => c['nombre'] == val,
-                      )['email']!;
-                    });
-                  }
-                },
-              ),
-            ),
+            _clientes.isEmpty
+                ? Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.redAccent),
+                    ),
+                    child: const Text(
+                      'No tienes clientes. Añade uno primero en la pestaña Clientes.',
+                      style: TextStyle(color: Colors.redAccent),
+                    ),
+                  )
+                : Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E1E),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: DropdownButton<String>(
+                      value: _clienteSeleccionado.isEmpty
+                          ? null
+                          : _clienteSeleccionado,
+                      isExpanded: true,
+                      dropdownColor: const Color(0xFF1E1E1E),
+                      underline: const SizedBox(),
+                      style: const TextStyle(color: Colors.white),
+                      items: _clientes
+                          .map(
+                            (c) => DropdownMenuItem(
+                              value: c['nombre'],
+                              child: Text(c['nombre']!),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _clienteSeleccionado = val;
+                            _clienteEmailSeleccionado = _clientes.firstWhere(
+                              (c) => c['nombre'] == val,
+                            )['email']!;
+                          });
+                        }
+                      },
+                    ),
+                  ),
             const SizedBox(height: 16),
-
-            // Tipo
             _seccion('Tipo de rutina'),
             _inputField(_tipoController, 'Ej: Torso/Pierna, Full Body...'),
             const SizedBox(height: 16),
-
-            // Fecha inicio
             _seccion('Fecha de inicio'),
             Row(
               children: [
-                // Día
                 Container(
                   width: 80,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -196,7 +223,6 @@ class _CrearRutinaScreenState extends ConsumerState<CrearRutinaScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Mes
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -221,7 +247,6 @@ class _CrearRutinaScreenState extends ConsumerState<CrearRutinaScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Año
                 Container(
                   width: 90,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -245,8 +270,6 @@ class _CrearRutinaScreenState extends ConsumerState<CrearRutinaScreen> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Días por semana
             _seccion('Días por semana'),
             Wrap(
               spacing: 8,
@@ -289,8 +312,6 @@ class _CrearRutinaScreenState extends ConsumerState<CrearRutinaScreen> {
               }).toList(),
             ),
             const SizedBox(height: 16),
-
-            // Nombre de los días
             _seccion('Nombre de los días'),
             ...List.generate(_diasPorSemana, (i) {
               return Padding(
@@ -326,7 +347,6 @@ class _CrearRutinaScreenState extends ConsumerState<CrearRutinaScreen> {
               );
             }),
             const SizedBox(height: 32),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
