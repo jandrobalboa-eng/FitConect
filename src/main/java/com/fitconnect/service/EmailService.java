@@ -1,7 +1,6 @@
 package com.fitconnect.service;
 
 import com.resend.Resend;
-import com.resend.core.exception.ResendException;
 import com.resend.services.emails.model.CreateEmailOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +66,7 @@ public class EmailService {
             resend.emails().send(params);
             log.info("Email de bienvenida enviado a {}", destinatario);
 
-        } catch (ResendException e) {
+        } catch (Exception e) {
             log.error("Error enviando email a {}: {}", emailDestino, e.getMessage());
         }
     }
