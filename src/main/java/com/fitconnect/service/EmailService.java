@@ -3,16 +3,21 @@ package com.fitconnect.service;
 import com.resend.Resend;
 import com.resend.core.exception.ResendException;
 import com.resend.services.emails.model.CreateEmailOptions;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-@Slf4j
 public class EmailService {
+
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     @Value("${resend.api.key:}")
     private String apiKey;
+
+    @Value("${resend.test.email:}")
+    private String testEmail;
 
     public void enviarBienvenida(String emailDestino, String nombre, String rol) {
         if (apiKey == null || apiKey.isBlank()) {
@@ -51,15 +56,16 @@ public class EmailService {
 
         try {
             Resend resend = new Resend(apiKey);
+            String destinatario = (testEmail != null && !testEmail.isBlank()) ? testEmail : emailDestino;
             CreateEmailOptions params = CreateEmailOptions.builder()
                     .from("FitConnect <onboarding@resend.dev>")
-                    .to(emailDestino)
+                    .to(destinatario)
                     .subject("¡Bienvenido/a a FitConnect " + emoji + "!")
                     .html(html)
                     .build();
 
             resend.emails().send(params);
-            log.info("Email de bienvenida enviado a {}", emailDestino);
+            log.info("Email de bienvenida enviado a {}", destinatario);
 
         } catch (ResendException e) {
             log.error("Error enviando email a {}: {}", emailDestino, e.getMessage());
